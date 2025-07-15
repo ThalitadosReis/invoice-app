@@ -5,7 +5,9 @@ import { db } from "@/db";
 import { redirect } from "next/navigation";
 
 export async function createAction(formData: FormData) {
-  const value = Math.floor(parseFloat(String(formData.get("value"))) * 100);
+  const value = Math.floor(
+    Number.parseFloat(String(formData.get("value"))) * 100
+  );
   const description = formData.get("description") as string;
 
   const results = await db
