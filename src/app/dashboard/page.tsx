@@ -14,14 +14,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import Container from "@/components/Container";
 import { CirclePlus } from "lucide-react";
 
 export default async function Home() {
   const results = await db.select().from(Invoices);
 
   return (
-    <main className="flex flex-col justify-center gap-4 max-w-5xl mx-auto my-12">
-      <div className="flex justify-between">
+    <main className="h-full">
+      <Container>
+      <div className="flex justify-between mb-6">
         <h1 className="text-3xl font-bold">Invoices</h1>
         <p>
           <Button variant="ghost" className="inline-flex gap-2" asChild>
@@ -96,6 +98,7 @@ export default async function Home() {
           })}
         </TableBody>
       </Table>
+      </Container>
     </main>
   );
 }
