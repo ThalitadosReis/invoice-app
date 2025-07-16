@@ -128,11 +128,8 @@ export default function SignUpPage() {
               />
               <Clerk.FieldError className="mt-2 block text-xs text-red-600" />
             </Clerk.Field>
-            <SignUp.Action
-              submit
-              className="relative w-full rounded-md bg-neutral-600 bg-gradient-to-b from-neutral-500 to-neutral-600 py-1.5 text-sm text-white shadow-[0_1px_1px_0_theme(colors.white/10%)_inset,0_1px_2.5px_0_theme(colors.black/36%)] outline-none ring-1 ring-inset ring-neutral-600 before:absolute before:inset-0 before:rounded-md before:bg-white/10 before:opacity-0 hover:before:opacity-100 focus-visible:outline-offset-2 focus-visible:outline-neutral-600 active:bg-neutral-600 active:text-white/60 active:before:opacity-0"
-            >
-              Continue
+            <SignUp.Action submit asChild>
+              <Button className="w-full font-bold">Continue</Button>
             </SignUp.Action>
           </SignUp.Strategy>
 

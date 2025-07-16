@@ -8,6 +8,13 @@
       "when": 1752224824876,
       "tag": "0000_slim_maximus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752691243174,
+      "tag": "0001_known_thor",
+      "breakpoints": true
     }
   ]
 }

@@ -1,10 +1,18 @@
 "use server";
 
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+
 import { Invoices } from "@/db/schema";
 import { db } from "@/db";
-import { redirect } from "next/navigation";
 
 export async function createAction(formData: FormData) {
+  const { userId } = await auth();
+
+   if (!userId) {
+    return;
+  }
+
   const value = Math.floor(
     Number.parseFloat(String(formData.get("value"))) * 100
   );
@@ -15,6 +23,7 @@ export async function createAction(formData: FormData) {
     .values({
       value,
       description,
+      userId,
       status: "open",
     })
     .returning({
