@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
 
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -69,14 +70,26 @@ export default async function Home() {
                 </TableCell>
                 <TableCell className="text-center p-0">
                   <Link className="block p-4" href={`/invoices/${result.id}`}>
-                    <Badge className="rounded-full">{result.status}</Badge>
+                    <Badge
+                      className={cn(
+                        "rounded-full capitalize",
+                        result.status === "open" && "bg-blue-500",
+                        result.status === "paid" && "bg-green-500",
+                        result.status === "void" && "bg-zinc-500",
+                        result.status === "uncollectible" && "bg-red-500"
+                      )}
+                    >
+                      {result.status}
+                    </Badge>
                   </Link>
                 </TableCell>
                 <TableCell className="text-right p-0">
-                   <Link
-                      href={`/invoices/${result.id}`}
-                      className="block p-4 font-semibold"
-                    >${(result.value / 100).toFixed(2)}</Link>
+                  <Link
+                    href={`/invoices/${result.id}`}
+                    className="block p-4 font-semibold"
+                  >
+                    ${(result.value / 100).toFixed(2)}
+                  </Link>
                 </TableCell>
               </TableRow>
             );
