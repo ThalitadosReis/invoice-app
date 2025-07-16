@@ -53,7 +53,14 @@ export default function SignInPage() {
             <p className="mb-4 text-center text-sm/5 text-neutral-500">
               Alternatively, sign in with these platforms
             </p>
-            <div className="space-y-2">
+            <div className="space-y-4">
+              <p className="text-center">
+                <SignIn.Passkey asChild>
+                  <Button className="w-full font-bold" variant="outline">
+                    Continue with Passkey
+                  </Button>
+                </SignIn.Passkey>
+              </p>
               <Clerk.Connection name="google" asChild>
                 <Button
                   className="flex gap-2 w-full font-bold"
