@@ -15,6 +15,13 @@
       "when": 1752691243174,
       "tag": "0001_known_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752738634498,
+      "tag": "0002_fat_boom_boom",
+      "breakpoints": true
     }
   ]
 }

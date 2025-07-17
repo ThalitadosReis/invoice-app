@@ -2,7 +2,7 @@
 
 import { useOptimistic } from "react";
 
-import { Invoices } from "@/db/schema";
+import { Customers, Invoices } from "@/db/schema";
 import { AVAILABLE_STATUSES } from "@/data/invoices";
 import { updateStatusAction, deleteInvoiceAction } from "@/app/actions";
 
@@ -30,7 +30,9 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, CreditCard, Ellipsis, Trash2 } from "lucide-react";
 
 interface InvoiceProps {
-  invoice: typeof Invoices.$inferSelect;
+  invoice: typeof Invoices.$inferSelect & {
+    customer: typeof Customers.$inferSelect;
+  }
 }
 
 export default function Invoice({ invoice }: InvoiceProps) {
@@ -171,13 +173,17 @@ export default function Invoice({ invoice }: InvoiceProps) {
             <strong className="block w-28 flex-shrink-0 font-medium text-sm">
               Billing Name
             </strong>
-            <span></span>
+            <span>
+              {invoice.customer.name}
+            </span>
           </li>
           <li className="flex gap-4">
             <strong className="block w-28 flex-shrink-0 font-medium text-sm">
               Billing Email
             </strong>
-            <span></span>
+            <span>
+              {invoice.customer.email}
+            </span>
           </li>
         </ul>
       </Container>

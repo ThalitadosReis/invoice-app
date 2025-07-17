@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { db } from "@/db";
-import { Invoices } from "@/db/schema";
+import { Customers, Invoices } from "@/db/schema";
 
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
@@ -29,7 +29,15 @@ export default async function Home() {
   const results = await db
     .select()
     .from(Invoices)
+    .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
     .where(eq(Invoices.userId, userId));
+
+  const invoices = results?.map(({ invoices, customers }) => {
+    return {
+      ...invoices,
+      customer: customers,
+    };
+  });
 
   return (
     <main className="h-full">
@@ -57,51 +65,57 @@ export default async function Home() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {results.map((result) => {
+            {invoices.map((invoice) => {
               return (
-                <TableRow key={result.id}>
+                <TableRow key={invoice.id}>
                   <TableCell className="font-medium text-left p-0">
                     <Link
-                      href={`/invoices/${result.id}`}
+                      href={`/invoices/${invoice.id}`}
                       className="block p-4 font-semibold"
                     >
-                      {new Date(result.createTs).toLocaleDateString("en-GB")}
+                      {new Date(invoice.createTs).toLocaleDateString("en-GB")}
                     </Link>
                   </TableCell>
                   <TableCell className="text-left p-0">
                     <Link
-                      href={`/invoices/${result.id}`}
+                      href={`/invoices/${invoice.id}`}
                       className="block p-4 font-semibold"
                     >
-                      Philip J. Fry
+                      {invoice.customer.name}
                     </Link>
                   </TableCell>
                   <TableCell className="text-left p-0">
-                    <Link href={`/invoices/${result.id}`} className="block p-4">
-                      fry@planetexpress.com
+                    <Link
+                      href={`/invoices/${invoice.id}`}
+                      className="block p-4"
+                    >
+                      {invoice.customer.email}
                     </Link>
                   </TableCell>
                   <TableCell className="text-center p-0">
-                    <Link className="block p-4" href={`/invoices/${result.id}`}>
+                    <Link
+                      className="block p-4"
+                      href={`/invoices/${invoice.id}`}
+                    >
                       <Badge
                         className={cn(
                           "rounded-full capitalize",
-                          result.status === "open" && "bg-blue-500",
-                          result.status === "paid" && "bg-green-500",
-                          result.status === "void" && "bg-zinc-500",
-                          result.status === "uncollectible" && "bg-red-500"
+                          invoice.status === "open" && "bg-blue-500",
+                          invoice.status === "paid" && "bg-green-500",
+                          invoice.status === "void" && "bg-zinc-500",
+                          invoice.status === "uncollectible" && "bg-red-500"
                         )}
                       >
-                        {result.status}
+                        {invoice.status}
                       </Badge>
                     </Link>
                   </TableCell>
                   <TableCell className="text-right p-0">
                     <Link
-                      href={`/invoices/${result.id}`}
+                      href={`/invoices/${invoice.id}`}
                       className="block p-4 font-semibold"
                     >
-                      ${(result.value / 100).toFixed(2)}
+                      ${(invoice.value / 100).toFixed(2)}
                     </Link>
                   </TableCell>
                 </TableRow>
