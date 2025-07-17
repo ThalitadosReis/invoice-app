@@ -1,8 +1,10 @@
 "use client";
 
+import { useOptimistic } from "react";
+
 import { Invoices } from "@/db/schema";
 import { AVAILABLE_STATUSES } from "@/data/invoices";
-import { updateStatusAction } from "@/app/actions";
+import { updateStatusAction, deleteInvoiceAction } from "@/app/actions";
 
 import { cn } from "@/lib/utils";
 
@@ -15,14 +17,40 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, CreditCard, Ellipsis, Trash2 } from "lucide-react";
 
 interface InvoiceProps {
   invoice: typeof Invoices.$inferSelect;
 }
 
 export default function Invoice({ invoice }: InvoiceProps) {
+  const [currentStatus, setCurrentStatus] = useOptimistic(
+    invoice.status,
+    (state, newStatus) => {
+      return String(newStatus);
+    }
+  );
+
+  async function handleOnUpdateStatus(formData: FormData) {
+    const originalStatus = currentStatus;
+    setCurrentStatus(formData.get("status") as string);
+    try {
+      await updateStatusAction(formData);
+    } catch {
+      setCurrentStatus(originalStatus);
+    }
+  }
+
   return (
     <main className="w-full h-full">
       <Container>
@@ -32,34 +60,95 @@ export default function Invoice({ invoice }: InvoiceProps) {
             <Badge
               className={cn(
                 "rounded-full capitalize",
-                invoice.status === "open" && "bg-blue-500",
-                invoice.status === "paid" && "bg-green-500",
-                invoice.status === "void" && "bg-zinc-500",
-                invoice.status === "uncollectible" && "bg-red-500"
+                currentStatus === "open" && "bg-blue-500",
+                currentStatus === "paid" && "bg-green-500",
+                currentStatus === "void" && "bg-zinc-500",
+                currentStatus === "uncollectible" && "bg-red-500"
               )}
             >
-              {invoice.status}
+              {currentStatus}
             </Badge>
           </h1>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="flex items-center gap-2" variant="outline">
-                Change Status
-                <ChevronDown className="w-4 h-auto" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {AVAILABLE_STATUSES.map((status) => (
-                <DropdownMenuItem key={status.id}>
-                  <form action={updateStatusAction}>
-                    <input type="hidden" name="id" value={invoice.id} />
-                    <input type="hidden" name="status" value={status.id} />
-                    <button type="submit">{status.label}</button>
-                  </form>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="flex items-center gap-2" variant="outline">
+                  Change Status
+                  <ChevronDown className="w-4 h-auto" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {AVAILABLE_STATUSES.map((status) => (
+                  <DropdownMenuItem key={status.id}>
+                    <form action={handleOnUpdateStatus}>
+                      <input type="hidden" name="id" value={invoice.id} />
+                      <input type="hidden" name="status" value={status.id} />
+                      <button type="submit">{status.label}</button>
+                    </form>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Dialog>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    className="flex items-center gap-2"
+                    variant="outline"
+                    type="button"
+                  >
+                    <span className="sr-only">More Options</span>
+                    <Ellipsis className="w-4 h-auto" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
+                    <DialogTrigger asChild>
+                      <button className="flex items-center gap-2" type="submit">
+                        <Trash2 className="w-4 h-auto" />
+                        Delete Invoice
+                      </button>
+                    </DialogTrigger>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem>
+                    <span className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-auto" />
+                      Payment
+                    </span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DialogContent className="bg-white">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">
+                    Delete Invoice?
+                  </DialogTitle>
+                  <DialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your invoice and remove your data from our servers.
+                  </DialogDescription>
+                  <DialogFooter>
+                    <form
+                      className="flex justify-center"
+                      action={deleteInvoiceAction}
+                    >
+                      <input type="hidden" name="id" value={invoice.id} />
+                      <Button
+                        variant="destructive"
+                        className="flex items-center gap-2"
+                        type="submit"
+                      >
+                        <Trash2 className="w-4 h-auto" />
+                        Delete Invoice
+                      </Button>
+                    </form>
+                  </DialogFooter>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <p className="text-3xl mb-3">${(invoice.value / 100).toFixed(2)}</p>
