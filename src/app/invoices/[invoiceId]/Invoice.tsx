@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useOptimistic } from "react";
 
 import { Customers, Invoices } from "@/db/schema";
@@ -114,10 +115,13 @@ export default function Invoice({ invoice }: InvoiceProps) {
                   </DropdownMenuItem>
 
                   <DropdownMenuItem>
-                    <span className="flex items-center gap-2">
+                    <Link
+                      href={`/invoices/${invoice.id}/payment`}
+                      className="flex items-center gap-2"
+                    >
                       <CreditCard className="w-4 h-auto" />
                       Payment
-                    </span>
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

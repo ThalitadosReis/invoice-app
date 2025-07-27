@@ -1,18 +1,17 @@
-import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
+import { Check, CreditCard } from "lucide-react";
 import Stripe from "stripe";
-
-import { db } from "@/db";
-import { Customers, Invoices } from "@/db/schema";
-import { createPayment, updateStatusAction } from "@/app/actions";
 
 import Container from "@/components/Container";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Customers, Invoices } from "@/db/schema";
 import { cn } from "@/lib/utils";
 
-import { Check, CreditCard } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
+import { createPayment, updateStatusAction } from "@/app/actions";
+import { db } from "@/db";
+import { notFound } from "next/navigation";
 
 const stripe = new Stripe(String(process.env.STRIPE_API_SECRET));
 
@@ -28,23 +27,24 @@ export default async function InvoicePage({
   params,
   searchParams,
 }: InvoicePageProps) {
-  const invoiceId = Number.parseInt(params.invoiceId);
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
 
-  const sessionId = searchParams.session_id;
-  const isSuccess = sessionId && searchParams.status === "success";
-  const isCanceled = searchParams.status === "canceled";
+  const invoiceId = Number.parseInt(resolvedParams.invoiceId);
+
+  const sessionId = resolvedSearchParams.session_id;
+  const isSuccess = sessionId && resolvedSearchParams.status === "success";
+  const isCanceled = resolvedSearchParams.status === "canceled";
   let isError = isSuccess && !sessionId;
-
-  console.log("isSuccess", isSuccess);
-  console.log("isCanceled", isCanceled);
 
   if (Number.isNaN(invoiceId)) {
     throw new Error("Invalid Invoice ID");
   }
 
   if (isSuccess) {
-    const { payment_status } =
-      await stripe.checkout.sessions.retrieve(sessionId);
+    const { payment_status } = await stripe.checkout.sessions.retrieve(
+      sessionId
+    );
 
     if (payment_status !== "paid") {
       isError = true;
@@ -105,7 +105,7 @@ export default async function InvoicePage({
                     invoice.status === "open" && "bg-blue-500",
                     invoice.status === "paid" && "bg-green-600",
                     invoice.status === "void" && "bg-zinc-700",
-                    invoice.status === "uncollectible" && "bg-red-600",
+                    invoice.status === "uncollectible" && "bg-red-600"
                   )}
                 >
                   {invoice.status}

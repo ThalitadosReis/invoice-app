@@ -8,11 +8,12 @@ import { notFound } from "next/navigation";
 import Invoice from "./Invoice";
 
 export default async function InvoicePage({ params }: { params: { invoiceId: string } }) {
+  const resolvedParams = await params;
   const { userId, orgId } = await auth();
 
   if (!userId) return;
 
-  const invoiceId = Number.parseInt(params.invoiceId);
+  const invoiceId = Number.parseInt(resolvedParams.invoiceId);
 
   if (Number.isNaN(invoiceId)) {
     throw new Error("Invalid Invoice ID");
